@@ -24,6 +24,8 @@ class NanoBLEFlashPrefs
 		// Initialization, writing or erasing flash memory is an asynchronous operation.
 		// You can test with operationCompleted() if writePrefs or deletePrefs is done.
   		bool operationCompleted();
+
+		const char * errorString(ret_code_t rc);
   	
 	private:
   		static bool opCompleted;

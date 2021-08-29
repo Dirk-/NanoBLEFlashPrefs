@@ -45,7 +45,9 @@ void setup() {
         Serial.println(prefsOut.anotherNumber);
     } else {
         Serial.print("No preferences found. Return code: ");
-        Serial.println(rc);
+        Serial.print(rc);
+        Serial.print(", ");
+        Serial.println(myFlashPrefs.errorString(rc));
     }
     Serial.println("");
 
@@ -74,7 +76,9 @@ void setup() {
         Serial.println(prefsOut.anotherNumber);
     } else {
         Serial.print("Return code: ");
-        Serial.println(rc);
+        Serial.print(rc);
+        Serial.print(", ");
+        Serial.println(myFlashPrefs.errorString(rc));
     }
     Serial.println("");
 
@@ -105,7 +109,9 @@ void setup() {
         Serial.println(prefsOut.anotherNumber);
     } else {
         Serial.print("Return code: ");
-        Serial.println(rc);
+        Serial.print(rc);
+        Serial.print(", ");
+        Serial.println(myFlashPrefs.errorString(rc));
     }
 
     Serial.println("");

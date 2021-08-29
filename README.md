@@ -1,6 +1,6 @@
 # NanoBLEFlashPrefs
 
-Substitute for EEPROM storage on Arduino Nano 33 BLE and 33 BLE Sense.
+Substitute for missing EEPROM storage on Arduino Nano 33 BLE and 33 BLE Sense.
 
 ## Info
 
@@ -21,7 +21,7 @@ You will end up with a folder `NanoBLEFlashPrefs-master` in your download folder
 - Move it to `Arduino/libraries` in your documents folder.
 - Restart Arduino IDE.
 
-The library has been tested with Arduino Nano BLE 33 BLE and version 2.4.1 of this board's
+The library has been tested with Arduino Nano 33 BLE and version 2.4.1 of this board's
 SDK. Make sure you have at least this version of `Arduino Mbed OS Nano Boards` installed.
 
 ## Usage
@@ -52,7 +52,7 @@ Deleting prefs and garbage collection is also supported.
 ### Library
 
 - Complete error handling
-- Test on Arduino Nano BLE 33 BLE Sense
+- Test on Arduino Nano 33 BLE Sense
 
 ### Documentation
 

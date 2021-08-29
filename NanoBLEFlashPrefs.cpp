@@ -28,6 +28,7 @@ char const * fds_err_str[] =
     "FDS_ERR_INTERNAL",
 };
 
+
 /* Array to map FDS events to strings. */
 static char const * fds_evt_str[] =
 {
@@ -83,6 +84,7 @@ NanoBLEFlashPrefs::NanoBLEFlashPrefs()
 	if (ret != NRF_SUCCESS) {
     	// Handle error.
 	}
+	
 }
 
 
@@ -181,4 +183,10 @@ bool NanoBLEFlashPrefs::operationCompleted()
 {
 	return opCompleted;
 }
+
+const char * NanoBLEFlashPrefs::errorString(ret_code_t rc)
+{
+	return fds_err_str[rc];
+}
+
 
