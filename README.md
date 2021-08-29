@@ -21,6 +21,19 @@ You will end up with a folder `NanoBLEFlashPrefs-master` in your download folder
 - Move it to `Arduino/libraries` in your documents folder.
 - Restart Arduino IDE.
 
+## Usage
+
+See the enclosed example. You can store any preferences you like in a struct like this:
+
+	// Preferences structure. Arbitrary, but must not exeed 1019 words (4076 byte)
+	typedef struct flashStruct {
+    	char someString[64];
+    	bool aSetting;
+    	int  someNumber;
+    	float anotherNumber;
+	} flashPrefs;
+
+
 ## TODO
 
 ### Library
