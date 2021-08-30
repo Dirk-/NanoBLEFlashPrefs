@@ -9,8 +9,8 @@ permanently. This library allows to store parameters and preferences between pro
 and even reflashing.
 
 The Arduino boards mentioned above use a nRF52840 microcontroller from Nordic Semiconductor. This chip
-features a very simple file system for flash storage. This is used here to store and retrieve
-an arbitrary struct of preferences of your program.
+features a very simple file system for flash storage. It is used here to store and retrieve
+an arbitrary struct of preferences of your sketch.
 
 ## Installation
 
@@ -36,16 +36,25 @@ See the enclosed example. You can store any preferences you like in a struct lik
     	float anotherNumber;
 	} flashPrefs;
 
-This is how you read and write prefs:
+This is how you read and write preferences:
 
-	NanoBLEFlashPrefs myFlashPrefs;
-	flashPrefs prefs;
+    NanoBLEFlashPrefs myFlashPrefs;
+    flashPrefs prefs;
 
     int rc = myFlashPrefs.readPrefs(&prefs, sizeof(prefs));
 
-	myFlashPrefs.writePrefs(&prefs, sizeof(prefs));
+    // Prepare preference record for writing
+    strcpy(prefs.someString, "NanoBLEFlashPrefs Test");
+    prefs.aSetting = true;
+    prefs.someNumber = 42;
+    prefs.anotherNumber = 3.14;
+    // Write it to flash memory
+    myFlashPrefs.writePrefs(&prefs, sizeof(prefs));
 	
-Deleting prefs and garbage collection is also supported.
+Initialization of the library, writing or erasing flash memory are an asynchronous operations.
+You can test with `operationCompleted()` if `writePrefs()` or `deletePrefs()` is done.
+
+Garbage collection is also supported. `deletePrefs()` actually only invalidates a preference record, so flash usage gradually increases. Use `garbageCollection()` to clear the file system from all invalid (deleted) preference records.
 
 ## TODO
 
@@ -62,4 +71,3 @@ Deleting prefs and garbage collection is also supported.
 
 See [nRF5 SDK](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk5.v15.0.0%2Flib_fstorage.html)
 by Nordic Semiconductor for sample code and additional information.
-
