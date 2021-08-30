@@ -69,5 +69,5 @@ Garbage collection is also supported. `deletePrefs()` actually only invalidates 
 
 ## Credits
 
-See [nRF5 SDK](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk5.v15.0.0%2Flib_fstorage.html)
+See [nRF5 SDK](https://infocenter.nordicsemi.com/topic/sdk_nrf5_v17.0.2/lib_fds.html)
 by Nordic Semiconductor for sample code and additional information.
