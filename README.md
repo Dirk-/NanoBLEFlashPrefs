@@ -60,7 +60,6 @@ Garbage collection is also supported. `deletePrefs()` actually only invalidates 
 
 ### Library
 
-- Complete error handling
 - Test on Arduino Nano 33 BLE Sense
 
 ### Documentation
