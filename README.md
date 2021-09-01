@@ -14,6 +14,10 @@ an arbitrary struct of preferences of your sketch.
 
 ## Installation
 
+- Search for `NanoBLEFlashPrefs` in the library manager of your Arduino IDE and install it.
+
+Alternatively:
+
 - Select `Download ZIP` from the GitHub `Code` button. Unzip the archive if it isn't already.
 You will end up with a folder `NanoBLEFlashPrefs-master` in your download folder. 
 
