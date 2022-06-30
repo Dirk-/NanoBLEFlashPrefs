@@ -38,6 +38,10 @@ static char const *fds_evt_str[] =
         "FDS_EVT_GC",
 };
 
+// Data buffer for write and update operations. Cannot be local in writePrefs()
+// because of 4 byte alignment (https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk5.v15.0.0%2Flib_fstorage.html)
+static uint8_t dataBuffer[4076];
+
 // Definition of static class members
 
 bool NanoBLEFlashPrefs::opCompleted;
@@ -47,9 +51,13 @@ ret_code_t NanoBLEFlashPrefs::lastResult = NRF_SUCCESS;
 // Simple event handler
 void NanoBLEFlashPrefs::fdsEventHandler(fds_evt_t const *fdsEvent)
 {
+  // Signal end of operation
   opCompleted = true;
+
+  // Make result of operation accessible
   lastResult = fdsEvent->result;
 
+  // We probably need this later...
   switch (fdsEvent->id)
   {
   case FDS_EVT_INIT:
@@ -74,22 +82,19 @@ NanoBLEFlashPrefs::NanoBLEFlashPrefs()
 {
   opCompleted = false;
 
-  ret_code_t ret = fds_register(fdsEventHandler);
-  if (ret != NRF_SUCCESS)
+  if (fds_register(fdsEventHandler) != NRF_SUCCESS)
   {
     // Registering of the FDS event handler has failed.
   }
 
-  ret = fds_init();
-  if (ret != NRF_SUCCESS)
+  if (fds_init() == NRF_SUCCESS) // Wait for completion
   {
-    // Handle error.
-  }
-
-  // Wait for initialization
-  while (!opCompleted)
-  {
-    /* wait */
+    while (!opCompleted)
+      {
+        // wait
+      }
+  } else {
+    // Give up.
   }
 }
 
@@ -102,45 +107,43 @@ int8_t NanoBLEFlashPrefs::writePrefs(void *value, int lengthInByte)
   // It is required to zero the token before first use.
   memset(&ftok, 0x00, sizeof(fds_find_token_t));
 
-  // Must be statically allocated, because it is going to be written to flash memory.
-  // (We wait for the operation to complete, so probably not neccesary)
-  static uint8_t m_data[4076];
-
-  opCompleted = false; // Will be set to true in event handler in case of NRF_SUCCESS
+  opCompleted = false; // Will be set to true in event handler
 
   // Copy data to static variable.
-  uint32_t const len = lengthInByte < sizeof(m_data) ? lengthInByte : sizeof(m_data);
-  memset(m_data, 0x00, sizeof(m_data));
-  memcpy(m_data, value, len);
+  uint32_t const len = lengthInByte < sizeof(dataBuffer) ? lengthInByte : sizeof(dataBuffer);
+  memset(dataBuffer, 0x00, sizeof(dataBuffer));
+  memcpy(dataBuffer, value, len);
 
   // Set up record.
   record.file_id = FILE_ID;
   record.key = RECORD_KEY;
-  record.data.p_data = m_data;
+  record.data.p_data = dataBuffer;
   // Calculate length in words, take into account any eventual remainder of the division.
   record.data.length_words = (len + 3) / 4;
   Serial.println(record.data.length_words);
 
+  ret_code_t ret = NRF_SUCCESS;
   if (fds_record_find(FILE_ID, RECORD_KEY, &record_desc, &ftok) == NRF_SUCCESS)
   {
-    Serial.println("UPDATE!");
-    ret_code_t ret = fds_record_update(&record_desc, &record);
-    Serial.println(errorString(ret));
+    ret = fds_record_update(&record_desc, &record);
+    // Serial.println(errorString(ret));
   }
   else
   {
-    Serial.println("WRITE!");
-    ret_code_t ret = fds_record_write(&record_desc, &record);
-    Serial.println(errorString(ret));
+    ret = fds_record_write(&record_desc, &record);
+    // Serial.println(errorString(ret));
   }
 
-  while (!opCompleted)
-  {
-    // Serial.println("fgh");
-    /* wait */
-  }
+  if (ret == NRF_SUCCESS) { // Call successful, wait for result
+    while (!opCompleted)
+    {
+      /* wait */
+    }
 
-  return lastResult;
+    ret = lastResult;
+  }
+  
+  return ret;
 }
 
 int8_t NanoBLEFlashPrefs::readPrefs(void *value, int lengthInByte)
@@ -182,7 +185,7 @@ int8_t NanoBLEFlashPrefs::deletePrefs()
   // It is required to zero the token before first use.
   memset(&ftok, 0x00, sizeof(fds_find_token_t));
 
-  ret_code_t rc;
+  ret_code_t rc = FDS_ERR_NOT_FOUND;
 
   // Loop until all records with the given key and file ID have been found.
   while (fds_record_find(FILE_ID, RECORD_KEY, &record_desc, &ftok) == NRF_SUCCESS)
@@ -197,21 +200,25 @@ int8_t NanoBLEFlashPrefs::deletePrefs()
     {
       /* wait */
     }
+    rc = lastResult;
   }
 
-  return lastResult;
+  return rc;
 }
 
 int8_t NanoBLEFlashPrefs::garbageCollection()
 {
   opCompleted = false; // Will be set to true in event handler
-  fds_gc();
-  while (!opCompleted)
-  {
+  ret_code_t rc = fds_gc();
+  if (rc == NRF_SUCCESS) {
+    while (!opCompleted)
+    {
     /* wait */
+    }
+    rc = lastResult;
   }
 
-  return lastResult;
+  return rc;
 }
 
 int8_t NanoBLEFlashPrefs::getStatistics()
