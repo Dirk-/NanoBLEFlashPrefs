@@ -40,7 +40,7 @@ static char const *fds_evt_str[] =
 
 // Data buffer for write and update operations. Cannot be local in writePrefs()
 // because of 4 byte alignment (https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk5.v15.0.0%2Flib_fstorage.html)
-static uint8_t dataBuffer[4076];
+uint8_t __attribute__((aligned(4))) dataBuffer[4076];
 
 // Definition of static class members
 
@@ -90,10 +90,12 @@ NanoBLEFlashPrefs::NanoBLEFlashPrefs()
   if (fds_init() == NRF_SUCCESS) // Wait for completion
   {
     while (!opCompleted)
-      {
-        // wait
-      }
-  } else {
+    {
+      // wait
+    }
+  }
+  else
+  {
     // Give up.
   }
 }
@@ -134,7 +136,8 @@ int8_t NanoBLEFlashPrefs::writePrefs(void *value, int lengthInByte)
     // Serial.println(errorString(ret));
   }
 
-  if (ret == NRF_SUCCESS) { // Call successful, wait for result
+  if (ret == NRF_SUCCESS)
+  { // Call successful, wait for result
     while (!opCompleted)
     {
       /* wait */
@@ -142,7 +145,9 @@ int8_t NanoBLEFlashPrefs::writePrefs(void *value, int lengthInByte)
 
     ret = lastResult;
   }
-  
+
+  opCompleted = true; // In case of an error it will not get set by the event handler, so set it here
+
   return ret;
 }
 
@@ -203,6 +208,8 @@ int8_t NanoBLEFlashPrefs::deletePrefs()
     rc = lastResult;
   }
 
+  opCompleted = true; // In case of an error it will not get set by the event handler, so set it here
+
   return rc;
 }
 
@@ -210,13 +217,16 @@ int8_t NanoBLEFlashPrefs::garbageCollection()
 {
   opCompleted = false; // Will be set to true in event handler
   ret_code_t rc = fds_gc();
-  if (rc == NRF_SUCCESS) {
+  if (rc == NRF_SUCCESS)
+  {
     while (!opCompleted)
     {
-    /* wait */
+      /* wait */
     }
     rc = lastResult;
   }
+
+  opCompleted = true; // In case of an error it will not get set by the event handler, so set it here
 
   return rc;
 }
