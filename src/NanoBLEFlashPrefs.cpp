@@ -122,7 +122,6 @@ int8_t NanoBLEFlashPrefs::writePrefs(void *value, int lengthInByte)
   record.data.p_data = dataBuffer;
   // Calculate length in words, take into account any eventual remainder of the division.
   record.data.length_words = (len + 3) / 4;
-  Serial.println(record.data.length_words);
 
   ret_code_t ret = NRF_SUCCESS;
   if (fds_record_find(FILE_ID, RECORD_KEY, &record_desc, &ftok) == NRF_SUCCESS)

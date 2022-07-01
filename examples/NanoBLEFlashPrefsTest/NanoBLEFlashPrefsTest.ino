@@ -62,6 +62,7 @@ void setup()
 
   // Write preference record
   Serial.println("Write preferences...");
+  myFlashPrefs.writePrefs(&prefs, sizeof(prefs));
   Serial.println("");
 
   // Read preference record
@@ -94,6 +95,7 @@ void setup()
 
   // Write preference record
   Serial.println("Write another preference record...");
+  myFlashPrefs.writePrefs(&prefs, sizeof(prefs));
   Serial.println("");
 
   // Read preference record
