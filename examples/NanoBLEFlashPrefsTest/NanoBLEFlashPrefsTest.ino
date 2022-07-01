@@ -1,9 +1,21 @@
+/*
+  NanoBLEFlashPrefsTest
+
+  Demonstrates the use of the NanoBLEFlashPrefs library for writing
+  and reading preferences and other values to flash storage
+
+  created 2021
+  by Dirk Fröhling
+
+  https://github.com/Dirk-/NanoBLEFlashPrefs
+*/
 #include <Arduino.h>
 #include <NanoBLEFlashPrefs.h>
 
 NanoBLEFlashPrefs myFlashPrefs;
 
-// Preferences structure. Arbitrary, but must not exeed 1019 words (4076 byte)
+// Structure of preferences. You determine the fields.
+// Must not exeed 1019 words (4076 byte).
 typedef struct flashStruct
 {
   char someString[64];
@@ -12,9 +24,10 @@ typedef struct flashStruct
   float anotherNumber;
 } flashPrefs;
 
-// Our preferences. All functions can read and write, but to make them permanent
-// the struct has to be written to flash explicitly (see below).
+// Our preferences. All functions here can read and modify these values, but to make
+// them permanent, the struct must be written to flash explicitly (see below).
 flashPrefs prefs;
+
 
 void setup()
 {

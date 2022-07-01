@@ -1,12 +1,12 @@
 #include <Arduino.h>
 #include "NanoBLEFlashPrefs.h"
 
-// See https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk5.v15.0.0%2Flib_fstorage.html
+// See https://infocenter.nordicsemi.com/topic/sdk_nrf5_v17.0.2/lib_fds.html
 
-#define FILE_ID 0x0001    /* The ID of the file to write the records into. */
-#define RECORD_KEY 0x1111 /* A key for the preferences record. */
+#define FILE_ID 0x0001    // The ID of the file to write the records into.
+#define RECORD_KEY 0x1111 // A key for the preferences record.
 
-/* Array to map FDS return values to strings. */
+// Array to map FDS return values to strings.
 char const *fds_err_str[] =
     {
         "FDS_SUCCESS",
@@ -27,34 +27,23 @@ char const *fds_err_str[] =
         "FDS_ERR_INTERNAL",
 };
 
-/* Array to map FDS events to strings. */
-static char const *fds_evt_str[] =
-    {
-        "FDS_EVT_INIT",
-        "FDS_EVT_WRITE",
-        "FDS_EVT_UPDATE",
-        "FDS_EVT_DEL_RECORD",
-        "FDS_EVT_DEL_FILE",
-        "FDS_EVT_GC",
-};
 
-// Data buffer for write and update operations. Cannot be local in writePrefs()
-// because of 4 byte alignment (https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk5.v15.0.0%2Flib_fstorage.html)
-uint8_t __attribute__((aligned(4))) dataBuffer[4076];
-
-// Definition of static class members
+// Static class members
 
 bool NanoBLEFlashPrefs::opCompleted;
 
-ret_code_t NanoBLEFlashPrefs::lastResult = NRF_SUCCESS;
+ret_code_t NanoBLEFlashPrefs::lastResult = FDS_SUCCESS;
 
-// Simple event handler
+
+// Simple event handler. Gets called when the async operations fds_record_write(),
+// fds_record_update(), fds_init() or fds_gc() complete.
 void NanoBLEFlashPrefs::fdsEventHandler(fds_evt_t const *fdsEvent)
 {
   // Signal end of operation
   opCompleted = true;
 
-  // Make result of operation accessible
+  // Make result of operation accessible. This is a different value than the
+  // immediate return value of the functions.
   lastResult = fdsEvent->result;
 
   // We probably need this later...
@@ -82,12 +71,12 @@ NanoBLEFlashPrefs::NanoBLEFlashPrefs()
 {
   opCompleted = false;
 
-  if (fds_register(fdsEventHandler) != NRF_SUCCESS)
+  if (fds_register(fdsEventHandler) != FDS_SUCCESS)
   {
     // Registering of the FDS event handler has failed.
   }
 
-  if (fds_init() == NRF_SUCCESS) // Wait for completion
+  if (fds_init() == FDS_SUCCESS) // Wait for completion
   {
     while (!opCompleted)
     {
@@ -100,11 +89,15 @@ NanoBLEFlashPrefs::NanoBLEFlashPrefs()
   }
 }
 
-int8_t NanoBLEFlashPrefs::writePrefs(void *value, int lengthInByte)
+int8_t NanoBLEFlashPrefs::writePrefs(void *value, unsigned int lengthInByte)
 {
   fds_record_t record;
   fds_record_desc_t record_desc;
   fds_find_token_t ftok;
+
+  // Data buffer for write and update operations. 4 byte alignment is crucial.
+  // (https://infocenter.nordicsemi.com/topic/sdk_nrf5_v17.0.2/group__fds.html#ga0114083241dc287c7145fe113c9adc2c)
+  uint8_t __attribute__((aligned(4))) dataBuffer[4076];
 
   // It is required to zero the token before first use.
   memset(&ftok, 0x00, sizeof(fds_find_token_t));
@@ -123,8 +116,8 @@ int8_t NanoBLEFlashPrefs::writePrefs(void *value, int lengthInByte)
   // Calculate length in words, take into account any eventual remainder of the division.
   record.data.length_words = (len + 3) / 4;
 
-  ret_code_t ret = NRF_SUCCESS;
-  if (fds_record_find(FILE_ID, RECORD_KEY, &record_desc, &ftok) == NRF_SUCCESS)
+  ret_code_t ret = FDS_SUCCESS;
+  if (fds_record_find(FILE_ID, RECORD_KEY, &record_desc, &ftok) == FDS_SUCCESS)
   {
     ret = fds_record_update(&record_desc, &record);
     // Serial.println(errorString(ret));
@@ -135,7 +128,7 @@ int8_t NanoBLEFlashPrefs::writePrefs(void *value, int lengthInByte)
     // Serial.println(errorString(ret));
   }
 
-  if (ret == NRF_SUCCESS)
+  if (ret == FDS_SUCCESS)
   { // Call successful, wait for result
     while (!opCompleted)
     {
@@ -150,7 +143,7 @@ int8_t NanoBLEFlashPrefs::writePrefs(void *value, int lengthInByte)
   return ret;
 }
 
-int8_t NanoBLEFlashPrefs::readPrefs(void *value, int lengthInByte)
+int8_t NanoBLEFlashPrefs::readPrefs(void *value, unsigned int lengthInByte)
 {
   fds_flash_record_t flash_record;
   fds_record_desc_t record_desc;
@@ -161,10 +154,10 @@ int8_t NanoBLEFlashPrefs::readPrefs(void *value, int lengthInByte)
 
   ret_code_t rc = FDS_ERR_NOT_FOUND;
   // Loop until all records with the given key and file ID have been found.
-  while (fds_record_find(FILE_ID, RECORD_KEY, &record_desc, &ftok) == NRF_SUCCESS)
+  while (fds_record_find(FILE_ID, RECORD_KEY, &record_desc, &ftok) == FDS_SUCCESS)
   {
     rc = fds_record_open(&record_desc, &flash_record);
-    if (rc != NRF_SUCCESS)
+    if (rc != FDS_SUCCESS)
     { // leave while loop in case of problems
       return rc;
     }
@@ -192,7 +185,7 @@ int8_t NanoBLEFlashPrefs::deletePrefs()
   ret_code_t rc = FDS_ERR_NOT_FOUND;
 
   // Loop until all records with the given key and file ID have been found.
-  while (fds_record_find(FILE_ID, RECORD_KEY, &record_desc, &ftok) == NRF_SUCCESS)
+  while (fds_record_find(FILE_ID, RECORD_KEY, &record_desc, &ftok) == FDS_SUCCESS)
   {
     opCompleted = false; // Will be set to true in event handler
     rc = fds_record_delete(&record_desc);
@@ -216,7 +209,7 @@ int8_t NanoBLEFlashPrefs::garbageCollection()
 {
   opCompleted = false; // Will be set to true in event handler
   ret_code_t rc = fds_gc();
-  if (rc == NRF_SUCCESS)
+  if (rc == FDS_SUCCESS)
   {
     while (!opCompleted)
     {
@@ -230,26 +223,26 @@ int8_t NanoBLEFlashPrefs::garbageCollection()
   return rc;
 }
 
-int8_t NanoBLEFlashPrefs::getStatistics()
+bool NanoBLEFlashPrefs::operationCompleted()
+{
+  return opCompleted;
+}
+
+const char *NanoBLEFlashPrefs::statusString()
 {
   fds_stat_t stats;
   fds_stat(&stats);
 
-  Serial.print("pages_available ");
-  Serial.println(stats.pages_available);
-  Serial.print("open_records ");
-  Serial.println(stats.open_records);
-  Serial.print("valid_records ");
-  Serial.println(stats.valid_records);
-  Serial.print("dirty_records ");
-  Serial.println(stats.dirty_records);
-  Serial.print("corruption ");
-  Serial.println(stats.corruption);
-}
+  static char str[100];
 
-bool NanoBLEFlashPrefs::operationCompleted()
-{
-  return opCompleted;
+  sprintf(str, "%d pages available, %d open records, %d valid records, %d dirty, %d corruption",
+    stats.pages_available,
+    stats.open_records,
+    stats.valid_records,
+    stats.dirty_records,
+    stats.corruption);
+
+  return str;
 }
 
 const char *NanoBLEFlashPrefs::errorString(int8_t returnCode)

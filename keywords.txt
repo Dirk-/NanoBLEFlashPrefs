@@ -17,6 +17,8 @@ readPrefs	KEYWORD2
 deletePrefs	KEYWORD2
 garbageCollection	KEYWORD2
 operationCompleted	KEYWORD2
+errorString	KEYWORD2
+statusString	KEYWORD2
 
 ###########################################
 # Constants (LITERAL1)

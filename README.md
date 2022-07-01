@@ -9,8 +9,10 @@ permanently. This library allows to store parameters and preferences between pro
 and even reflashing.
 
 The Arduino boards mentioned above use a nRF52840 microcontroller from Nordic Semiconductor. This chip
-features a very simple file system for flash storage. It is used here to store and retrieve
+features a very simple file system for flash storage. It is used here to easily store and retrieve
 an arbitrary struct of preferences of your sketch.
+
+**Please note:** Starting with version 1.1 of the library, all functions are synchronized. Therefore you should remove waiting loops with calls to `operationCompleted()` in your existing code.
 
 ## Installation
 
@@ -54,9 +56,11 @@ This is how you read and write preferences:
     prefs.anotherNumber = 3.14;
     // Write it to flash memory
     myFlashPrefs.writePrefs(&prefs, sizeof(prefs));
-	
-Initialization of the library, writing or erasing flash memory are an asynchronous operations.
-You can test with `operationCompleted()` if `writePrefs()` or `deletePrefs()` is done.
+
+In order to understand the return values of the functions use `errorString()` like this:
+
+    int rc = myFlashPrefs.readPrefs(&prefs, sizeof(prefs));
+    Serial.println(myFlashPrefs.errorString(rc));
 
 Garbage collection is also supported. `deletePrefs()` actually only invalidates a preference record, so flash usage gradually increases. Use `garbageCollection()` to clear the file system from all invalid (deleted) preference records.
 
