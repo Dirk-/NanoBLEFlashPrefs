@@ -57,7 +57,7 @@ This is how you read and write preferences:
     // Write it to flash memory
     myFlashPrefs.writePrefs(&prefs, sizeof(prefs));
 
-In order to understand the return values of the functions use `errorString()` like this:
+In order to understand the return values of the functions, use `errorString()` like this:
 
     int rc = myFlashPrefs.readPrefs(&prefs, sizeof(prefs));
     Serial.println(myFlashPrefs.errorString(rc));
