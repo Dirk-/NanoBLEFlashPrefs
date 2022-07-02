@@ -62,6 +62,12 @@ In order to understand the return values of the functions, use `errorString()` l
     int rc = myFlashPrefs.readPrefs(&prefs, sizeof(prefs));
     Serial.println(myFlashPrefs.errorString(rc));
 
+If you want to learn more about the status of your Nano 33 BLE flash file system, use `statusString()` like this:
+
+    Serial.println(myFlashPrefs.statusString());
+
+For interpretation of this information look at the [nRF5 SDK website](https://infocenter.nordicsemi.com/topic/sdk_nrf5_v17.0.2/lib_fds.html).
+
 Garbage collection is also supported. `deletePrefs()` actually only invalidates a preference record, so flash usage gradually increases. Use `garbageCollection()` to clear the file system from all invalid (deleted) preference records.
 
 ## TODO
