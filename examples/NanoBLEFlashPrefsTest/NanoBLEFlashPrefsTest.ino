@@ -1,8 +1,8 @@
 /*
   NanoBLEFlashPrefsTest
 
-  Demonstrates the use of the NanoBLEFlashPrefs library for writing
-  and reading preferences and other values to flash storage
+  Demonstrates the use of the NanoBLEFlashPrefs library for storing
+  preferences and other values in flash memory
 
   created 2021
   by Dirk Fröhling
@@ -27,7 +27,6 @@ typedef struct flashStruct
 // Our preferences. All functions here can read and modify these values, but to make
 // them permanent, the struct must be written to flash explicitly (see below).
 flashPrefs prefs;
-
 
 void setup()
 {
