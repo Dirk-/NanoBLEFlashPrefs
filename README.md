@@ -12,7 +12,7 @@ The Arduino boards mentioned above use a nRF52840 microcontroller from Nordic Se
 features a very simple file system for flash storage. It is used here to easily store and retrieve
 an arbitrary struct of preferences of your sketch.
 
-**Please note:** Starting with version 1.1 of the library, all functions are synchronized. Therefore you should remove waiting loops with calls to `operationCompleted()` in your existing code.
+**Please note:** Starting with version 1.1 of the library, all functions are synchronous. Therefore you should remove waiting loops with calls to `operationCompleted()` in your existing code.
 
 ## Installation
 
