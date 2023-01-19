@@ -1,6 +1,6 @@
 # NanoBLEFlashPrefs
 
-Substitute for missing EEPROM storage on Arduino Nano 33 BLE and 33 BLE Sense.
+Substitute for missing EEPROM storage on Arduino Nano 33 BLE and 33 BLE Sense (not for Nano 33 IoT or other Nano boards).
 
 ## Info
 
