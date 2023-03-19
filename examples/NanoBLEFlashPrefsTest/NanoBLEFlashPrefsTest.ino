@@ -12,6 +12,7 @@
 #include <Arduino.h>
 #include <NanoBLEFlashPrefs.h>
 
+// Access to the library
 NanoBLEFlashPrefs myFlashPrefs;
 
 // Structure of preferences. You determine the fields.
@@ -26,115 +27,111 @@ typedef struct flashStruct
 
 // Our preferences. All functions here can read and modify these values, but to make
 // them permanent, the struct must be written to flash explicitly (see below).
-flashPrefs prefs;
+flashPrefs globalPrefs;
 
 void setup()
 {
-  // Another preferences variable just to show it actually works.
+  // Another preferences variable just to show it actually works
+  // (We use globalPrefs for writing and localPrefs for reading).
   // You could use a single variable to read from and write to flash.
-  flashPrefs prefsOut;
+  flashPrefs localPrefs;
 
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   // Give user a chance to open the terminal
   delay(5000);
-
-  /*
-  // Uncomment this if you always want to see what happens if there are no prefs to read.
-  // You also see what happens if you run the sketch for the first time on your Arduino Nano BLE.
-  myFlashPrefs.deletePrefs();
-  myFlashPrefs.garbageCollection();
-  */
+  Serial.println("----- NanoBLEFlashPrefs Test -----");
 
   // See if we already have a preference record
-  Serial.println("Read record...");
-  int rc = myFlashPrefs.readPrefs(&prefsOut, sizeof(prefsOut));
+  Serial.println("Read preference record...");
+  int rc = myFlashPrefs.readPrefs(&localPrefs, sizeof(localPrefs));
   if (rc == FDS_SUCCESS)
   {
-    Serial.println("Preferences found: ");
-    Serial.println(prefsOut.someString);
-    Serial.println(prefsOut.aSetting);
-    Serial.println(prefsOut.someNumber);
-    Serial.println(prefsOut.anotherNumber);
+    printPreferences(localPrefs);
   }
   else
   {
-    Serial.print("No preferences found. Return code: ");
-    Serial.print(rc);
-    Serial.print(", ");
-    Serial.println(myFlashPrefs.errorString(rc));
+    Serial.println("No preferences found."); // This should be the case when running for the first time on that particular board
+    printReturnCode(rc);
   }
   Serial.println("");
 
   // Prepare preference record for writing
-  strcpy(prefs.someString, "NanoBLEFlashPrefs Test");
-  prefs.aSetting = true;
-  prefs.someNumber = 42;
-  prefs.anotherNumber = 3.14;
+  strcpy(globalPrefs.someString, "NanoBLEFlashPrefs Test");
+  globalPrefs.aSetting = true;
+  globalPrefs.someNumber = 42;
+  globalPrefs.anotherNumber = 3.14;
 
   // Write preference record
   Serial.println("Write preferences...");
-  myFlashPrefs.writePrefs(&prefs, sizeof(prefs));
+  printReturnCode(myFlashPrefs.writePrefs(&globalPrefs, sizeof(globalPrefs)));
   Serial.println("");
 
   // Read preference record
   Serial.println("Read preferences...");
-  rc = myFlashPrefs.readPrefs(&prefsOut, sizeof(prefsOut));
+  rc = myFlashPrefs.readPrefs(&localPrefs, sizeof(localPrefs));
   if (rc == FDS_SUCCESS)
   {
-    Serial.println("Preferences read: ");
-    Serial.println(prefsOut.someString);
-    Serial.println(prefsOut.aSetting);
-    Serial.println(prefsOut.someNumber);
-    Serial.println(prefsOut.anotherNumber);
+    printPreferences(localPrefs);
   }
   else
   {
-    Serial.print("Return code: ");
-    Serial.print(rc);
-    Serial.print(", ");
-    Serial.println(myFlashPrefs.errorString(rc));
+    printReturnCode(rc);
   }
   Serial.println("");
 
   delay(1000);
 
   // Change preference record
-  strcpy(prefs.someString, "NanoBLEFlashPrefs Test 2");
-  prefs.aSetting = false;
-  prefs.someNumber = 5050;
-  prefs.anotherNumber = 2.72;
+  strcpy(globalPrefs.someString, "NanoBLEFlashPrefs Test 2");
+  globalPrefs.aSetting = false;
+  globalPrefs.someNumber = 5050;
+  globalPrefs.anotherNumber = 2.72;
 
   // Write preference record
   Serial.println("Write another preference record...");
-  myFlashPrefs.writePrefs(&prefs, sizeof(prefs));
+  printReturnCode(myFlashPrefs.writePrefs(&globalPrefs, sizeof(globalPrefs)));
   Serial.println("");
 
   // Read preference record
   Serial.println("Read preferences...");
-  rc = myFlashPrefs.readPrefs(&prefsOut, sizeof(prefsOut));
+  rc = myFlashPrefs.readPrefs(&localPrefs, sizeof(localPrefs));
   if (rc == FDS_SUCCESS)
   {
-    Serial.println("Preferences read: ");
-    Serial.println(prefsOut.someString);
-    Serial.println(prefsOut.aSetting);
-    Serial.println(prefsOut.someNumber);
-    Serial.println(prefsOut.anotherNumber);
+    printPreferences(localPrefs);
   }
   else
   {
-    Serial.print("Return code: ");
-    Serial.print(rc);
-    Serial.print(", ");
-    Serial.println(myFlashPrefs.errorString(rc));
+    printReturnCode(rc);
   }
 
   Serial.println("");
-  Serial.println("Done. Press reset button to see that again.");
+  Serial.println("Done. Press reset button to see that again or take look at");
+  Serial.println("the NanoBLEFlashPrefsUtils example for more info.");
   Serial.println("");
 }
 
 void loop()
 {
   // put your main code here, to run repeatedly:
+}
+
+// Print preference record to Serial.
+// You have to adapt this to your particular structure.
+void printPreferences(flashPrefs thePrefs)
+{
+  Serial.println("Preferences: ");
+  Serial.println(thePrefs.someString);
+  Serial.println(thePrefs.aSetting);
+  Serial.println(thePrefs.someNumber);
+  Serial.println(thePrefs.anotherNumber);
+}
+
+// Print return code infos to Serial.
+void printReturnCode(int rc)
+{
+  Serial.print("Return code: ");
+  Serial.print(rc);
+  Serial.print(", ");
+  Serial.println(myFlashPrefs.errorString(rc));
 }

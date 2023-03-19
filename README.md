@@ -21,7 +21,7 @@ an arbitrary struct of preferences of your sketch.
 Alternatively:
 
 - Select `Download ZIP` from the GitHub `Code` button. Unzip the archive if it isn't already.
-You will end up with a folder `NanoBLEFlashPrefs-master` in your download folder. 
+  You will end up with a folder `NanoBLEFlashPrefs-master` in your download folder.
 
 - Rename that folder to `NanoBLEFlashPrefs`.
 - Move it to `Arduino/libraries` in your documents folder.
@@ -32,15 +32,15 @@ SDK. Make sure you have at least this version of `Arduino Mbed OS Nano Boards` i
 
 ## Usage
 
-See the enclosed example. You can store any preferences you like in a struct like this:
+See the enclosed `NanoBLEFlashPrefsTest` example. You can store any preferences you like in a struct like this:
 
-	// Preferences structure. Arbitrary, but must not exeed 1019 words (4076 byte)
-	typedef struct flashStruct {
+    // Preferences structure. Arbitrary, but must not exeed 1019 words (4076 byte)
+    typedef struct flashStruct {
     	char someString[64];
     	bool aSetting;
     	int  someNumber;
     	float anotherNumber;
-	} flashPrefs;
+    } flashPrefs;
 
 This is how you read and write preferences:
 
@@ -66,9 +66,9 @@ If you want to learn more about the status of your Nano 33 BLE flash file system
 
     Serial.println(myFlashPrefs.statusString());
 
-For interpretation of this information look at the [nRF5 SDK website](https://infocenter.nordicsemi.com/topic/sdk_nrf5_v17.0.2/lib_fds.html).
+For interpretation of this information look at the [nRF5 SDK website](https://infocenter.nordicsemi.com/topic/sdk_nrf5_v17.1.0/lib_fds.html).
 
-Garbage collection is also supported. `deletePrefs()` actually only invalidates a preference record, so flash usage gradually increases. Use `garbageCollection()` to clear the file system from all invalid (deleted) preference records.
+Garbage collection is also supported. `deletePrefs()` actually only invalidates a preference record, so flash usage gradually increases. Use `garbageCollection()` to clear the file system from all invalid (deleted) preference records. Please see the `NanoBLEFlashPrefsUtils` sample code for more information.
 
 ## TODO
 
@@ -82,5 +82,5 @@ Garbage collection is also supported. `deletePrefs()` actually only invalidates 
 
 ## Credits
 
-See [nRF5 SDK](https://infocenter.nordicsemi.com/topic/sdk_nrf5_v17.0.2/lib_fds.html)
+See [nRF5 SDK](https://infocenter.nordicsemi.com/topic/sdk_nrf5_v17.1.0/lib_fds.html)
 by Nordic Semiconductor for sample code and additional information.
